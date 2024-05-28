@@ -24,16 +24,17 @@ int main()
 {
     setlocale(LC_ALL, "rus");
 
-    ifstream fin;
-    fin.open("text.txt");
+    ifstream fin;                 //подключение
+    fin.open("text.txt");         //файла
 
     char bortNumber[255];
     char reisNumber[255];
     int errorsReturn[255];
-    int number;
-    int numberArr[255];
-    int noErrNumberArr[255];
-    char markFA[255];
+    int fullErrorsReturn[255];
+    int number;                         //
+    int numberArr[255];                 //инициализация 
+    int noErrNumberArr[255];            //переменных
+    char markFA[255];                   //
     char time[255];
     int k = 0;
     int nek = 0;
@@ -42,15 +43,16 @@ int main()
     int errorNum = 0;
     int lengthArrNumberErrStr = 0;
 
-    while (fin.peek() != ' ') {
-        readFile(fin, bortNumber, reisNumber, markFA, time);
+    while (fin.peek() != ' ') {                                 //цикл пока файл не кончится
+        
+        readFile(fin, bortNumber, reisNumber, markFA, time);    //считываем строку из файла
 
-        number = srez(reisNumber);
-        numberErrStr++;
+        number = srez(reisNumber);                              //обрезаем и переводим в целочисленный тип нужные нам для сортировки данные
+        numberErrStr++;                             //переменная-счётчик кол-ва строк с ошибками
          
-        checkData(bortNumber, reisNumber, time, errorsReturn);
+        checkData(bortNumber, reisNumber, time, errorsReturn);  //проверка исходных данных
 
-        for (int i = 0; i <= getIntLen(errorsReturn); i++) {
+        for (int i = 0; i <= getIntLen(errorsReturn); i++) {    //цикл вывода ошибок на экран
             errorNum = errorsReturn[i];
             if (errorNum != 0) {
                 cout << "Некорректные исходные данные в строке " << numberErrStr << "\n";
@@ -62,48 +64,48 @@ int main()
                 case 3:cout << "цифровой части бортового номера!\n"; break;
                 case 4:cout << "формата номера рейса!\n"; break;
                 case 5:cout << "цифровой части номера рейса!\n"; break;
+                case 6:cout << "длины номера рейса(некорректная форма или цифровая часть)!\n"; break;
                 default: cout << "неизвестная ошибка!\n"; break;
                 }
             }
         }
 
-        if (errorsReturn[0] != 0) {
-            arrNumberErrStr[lengthArrNumberErrStr] = numberErrStr;
-            lengthArrNumberErrStr++;
+        if (errorsReturn[0] != 0) {                                 //
+            arrNumberErrStr[lengthArrNumberErrStr] = numberErrStr;  //заполнение массива строк, в которых есть ошибки
+            lengthArrNumberErrStr++;                                //
         }
         else {
-            noErrNumberArr[nek] = number;
-            nek++;
+            noErrNumberArr[nek] = number;       //заполнение массива строк, 
+            nek++;                              //в которых нет ошибок
         }
 
-        numberArr[k] = number;
+        k++;        //счётчик строк с ошибками
 
-        k++;
     }
-    fin.close();
+    fin.close();    //закрываем файл
 
-    echoPrintTable(fin, bortNumber, reisNumber, markFA, time, k, arrNumberErrStr, lengthArrNumberErrStr);
+    echoPrintTable(fin, bortNumber, reisNumber, markFA, time, k, arrNumberErrStr, lengthArrNumberErrStr);   //печатаем исходную таблицу с выделением строк, в которых некорректные данные
     
-    bubbleSort(nek, noErrNumberArr);
+    bubbleSort(nek, noErrNumberArr);    //сортируем массив цифровых частей номеров рейсов
     
     cout << "\n\n\nОтсортированная по цифровой части номера рейса таблица: \n";
-    sortPrintTable(fin, bortNumber, reisNumber, markFA, time, nek, noErrNumberArr);
+    sortPrintTable(fin, bortNumber, reisNumber, markFA, time, nek, noErrNumberArr);     //выводим готовую таблицу
 }
 
 void readFile(ifstream& fin, char bortNumber[255], char reisNumber[255], char markFA[255], char time[255]) {
     fin >> bortNumber;
-    fin >> reisNumber;
-    fin >> markFA;
+    fin >> reisNumber;  //считывааем данные
+    fin >> markFA;      //из файла в каждую переменную
     fin >> time;
 }
 
 void bubbleSort(int nek, int noErrNumberArr[255]) {
-    int temp;
-    int max_index;
-    while (nek != 0) {
+    int temp;           //временная переменная
+    int max_index;      //максимальный индекс
+    while (nek != 0) {  //цикл пока "длина" массива не будет равна нулю
         max_index = 0;
-        for (int i = 1; i < nek; i++) {
-            if (noErrNumberArr[i - 1] > noErrNumberArr[i]) {
+        for (int i = 1; i < nek; i++) { //цикл по всей длинне
+            if (noErrNumberArr[i - 1] > noErrNumberArr[i]) { //условие для выдвижения максимального элемента в конец
                 temp = noErrNumberArr[i - 1];
                 noErrNumberArr[i - 1] = noErrNumberArr[i];
                 noErrNumberArr[i] = temp;
@@ -130,28 +132,30 @@ void checkData(char bortNumber[255], char reisNumber[255], char time[255], int e
         errorsReturn[i] = 2;
         i++;
     }
-    for (int j = 2; j < 6; j++) {
+    for (int j = getCharLen(bortNumber)-3; j < getCharLen(bortNumber); j++) {
         if (not(isdigit(bortNumber[j]))) {
             errorsReturn[i] = 3;
             i++;
         }
     }
-    if (getCharLen(bortNumber) != 6) {
+    /*if (getCharLen(bortNumber) != 6) {
         errorsReturn[i] = 3;
         i++;
-    }
+    }*/
     if (reisNumber[0] != 'Р' || reisNumber[1] != 'Е' || reisNumber[2] != 'Й' || reisNumber[3] != 'С') {
         errorsReturn[i] = 4;
         i++;
     }
-    for (int j = 4; j < 8; j++) {
-        if (not(isdigit(reisNumber[j]))) {
+    int k = 0;
+    for (int j = getCharLen(reisNumber)-3; j < getCharLen(reisNumber); j++) {
+        k++;
+        if (not(isdigit(reisNumber[j])) || k > 4) {
             errorsReturn[i] = 5;
             i++;
         }
     }
     /*if (getCharLen(reisNumber) != 8) {
-        errorsReturn[i] = 5;
+        errorsReturn[i] = 6;
         i++;
     }*/
     if (getCharLen(time) != 5) {
